@@ -26,7 +26,15 @@ private:
 
 #include <iostream>
 
+#include "List.h"
+
 int main() 
 {
+    List myList(3, "NodeSave");
+    List newList(3, "NodeLoad");
+
+    myList.display();
+    newList.display();
+
     return 0;
 }
