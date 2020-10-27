@@ -30,11 +30,21 @@ private:
 
 int main() 
 {
+    const char* filename = "List.bin";
+    FILE* pFile = fopen(filename, "wb");
     List myList(3, "NodeSave");
-    List newList(3, "NodeLoad");
+    List newList;
 
+    myList.Serialize(pFile);
     myList.display();
+    fclose(pFile);
+
     newList.display();
+
+    pFile = fopen(filename, "rb");
+    newList.Deserialize(pFile);
+    newList.display();
+    fclose(pFile);
 
     return 0;
 }

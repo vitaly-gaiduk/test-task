@@ -15,7 +15,7 @@ List::List(int cnt, const char* str) : count(0), head(nullptr), tail(nullptr)
 	for (int i = 0; i < cnt; ++i) {
 		std::string str(str);
 		str += '0' + i;
-		push_back(str);
+		push_back(str, -1);
 	}
 }
 
@@ -30,7 +30,7 @@ List::~List()
 	}
 }
 
-void List::push_front(std::string data)
+void List::push_front(std::string data, int rand_pos)
 {
 	ListNode* newNode = new ListNode;
 
@@ -38,10 +38,13 @@ void List::push_front(std::string data)
 	newNode->next = head;
 	newNode->data = data;
 
-	if (count)
-		newNode->rand = seek(rand() % count);
+	if (rand_pos != -1)
+		newNode->rand = seek(rand_pos);
 	else
-		newNode->rand = nullptr;
+		if (count)
+			newNode->rand = seek(rand() % count);
+		else
+			newNode->rand = nullptr;
 
 	if (head)
 		head->prev = newNode;
@@ -54,7 +57,7 @@ void List::push_front(std::string data)
 	count++;
 }
 
-void List::push_back(std::string data)
+void List::push_back(std::string data, int rand_pos)
 {
 	ListNode* newNode = new ListNode;
 
@@ -62,10 +65,13 @@ void List::push_back(std::string data)
 	newNode->prev = tail;
 	newNode->data = data;
 
-	if (count)
-		newNode->rand = seek(rand() % count);
+	if (rand_pos != -1)
+		newNode->rand = seek(rand_pos);
 	else
-		newNode->rand = nullptr;
+		if (count)
+			newNode->rand = seek(rand() % count);
+		else
+			newNode->rand = nullptr;
 
 	if (tail)
 		tail->next = newNode;
@@ -102,6 +108,46 @@ void List::pop_back()
 
 	checkLink(pop);
 	delete pop;
+}
+
+void List::Serialize(FILE* file)  // сохранение в файл (файл открыт с помощью fopen(path, "wb"))
+{
+	ListNode* node;
+
+	int pos;
+	fwrite(&count, sizeof(int), 1, file);
+
+	for (node = head, pos = 0; node; node = node->next, ++pos) {
+		int rand_pos = toNode(node->rand);
+
+		fwrite(&pos, sizeof(int), 1, file);
+		fwrite(&rand_pos, sizeof(int), 1, file);
+
+		int dataSize = node->data.size();
+		fwrite(&dataSize, sizeof(int), 1, file);
+		fwrite(&node->data[0], dataSize, 1, file);
+	}
+}
+
+void List::Deserialize(FILE* file)  // загрузка из файла (файл открыт с помощью fopen(path, "rb"))
+{
+	int size;
+
+	fread(&size, sizeof(int), 1, file);
+
+	for (int i = 0; i < size; ++i) {
+		int pos, rand_pos;
+		fread(&pos, sizeof(int), 1, file);
+		fread(&rand_pos, sizeof(int), 1, file);
+
+		int dataSize;
+		std::string data;
+		fread(&dataSize, sizeof(int), 1, file);
+		data.resize(dataSize);
+		fread(&data[0], dataSize, 1, file);
+
+		push_back(data, rand_pos);
+	}
 }
 
 void List::display()
@@ -148,6 +194,22 @@ List::ListNode* List::seek(int pos)
 	for (int i = 0; i < pos; ++i, node = node->next); // seek to pos
 
 	return node;
+}
+
+int List::toNode(ListNode* to)
+{
+	ListNode* node;
+	int pos;
+
+	if (!to)
+		return -1;
+
+	for (node = head, pos = 0; node; node = node->next, ++pos) {
+		if (to == node)
+			return pos;
+	}
+
+	return -1;
 }
 
 void List::checkLink(ListNode* unlinked)

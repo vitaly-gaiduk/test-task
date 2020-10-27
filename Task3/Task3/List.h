@@ -20,8 +20,8 @@ public:
 	List(int cnt, const char* str);
 	~List();
 
-	void push_front(std::string data);
-	void push_back(std::string data);
+	void push_front(std::string data, int rand_pos);
+	void push_back(std::string data, int rand_pos);
 
 	void pop_front();
 	void pop_back();
@@ -32,5 +32,6 @@ public:
 	void display();
 protected:
 	ListNode* seek(int pos);
+	int toNode(ListNode* node);
 	void checkLink(ListNode* unlinked);
 };
